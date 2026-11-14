@@ -129,7 +129,7 @@ ground.receiveShadow = true
 world.add(ground)
 
 const street = new THREE.Mesh(
-  new THREE.BoxGeometry(42, 0.18, 100),
+  new THREE.BoxGeometry(72, 0.18, 100),
   new THREE.MeshPhongMaterial({ color: '#2a2d31', shininess: 12 })
 )
 street.position.y = 0.1
@@ -137,15 +137,15 @@ street.receiveShadow = true
 world.add(street)
 
 const sidewalkLeft = new THREE.Mesh(
-  new THREE.BoxGeometry(12, 0.12, 105),
+  new THREE.BoxGeometry(16, 0.12, 105),
   new THREE.MeshPhongMaterial({ color: '#b5bcc7', shininess: 8 })
 )
-sidewalkLeft.position.set(-28, 0.07, 0)
+sidewalkLeft.position.set(-44, 0.07, 0)
 sidewalkLeft.receiveShadow = true
 world.add(sidewalkLeft)
 
 const sidewalkRight = sidewalkLeft.clone()
-sidewalkRight.position.x = 28
+sidewalkRight.position.x = 44
 world.add(sidewalkRight)
 
 for (let z = -42; z <= 42; z += 12) {
@@ -241,7 +241,7 @@ function clamp(value, min, max) {
 }
 
 function moveWithCollisions(nextPos, radius) {
-  nextPos.x = clamp(nextPos.x, -32 + radius, 32 - radius)
+  nextPos.x = clamp(nextPos.x, -38 + radius, 38 - radius)
   nextPos.z = clamp(nextPos.z, -46 + radius, 46 - radius)
 
   for (const rect of obstacleRects) {
@@ -403,6 +403,13 @@ function createHamster() {
   head.position.set(0, 1.55, 0.3)
   group.add(head)
 
+  const hair = new THREE.Mesh(
+    new THREE.BoxGeometry(0.82, 0.18, 0.72),
+    new THREE.MeshPhongMaterial({ color: '#5b3622', shininess: 8 })
+  )
+  hair.position.set(0, 1.96, 0.25)
+  group.add(hair)
+
   const snout = new THREE.Mesh(
     new THREE.BoxGeometry(0.42, 0.2, 0.22),
     new THREE.MeshPhongMaterial({ color: '#eed0a5', shininess: 8 })
@@ -410,12 +417,16 @@ function createHamster() {
   snout.position.set(0, 1.5, 0.8)
   group.add(snout)
 
-  const eyes = new THREE.Mesh(
+  const leftEye = new THREE.Mesh(
     new THREE.BoxGeometry(0.08, 0.08, 0.08),
     new THREE.MeshPhongMaterial({ color: '#111111', shininess: 6 })
   )
-  eyes.position.set(0, 1.72, 0.82)
-  group.add(eyes)
+  leftEye.position.set(-0.15, 1.72, 0.82)
+  group.add(leftEye)
+
+  const rightEye = leftEye.clone()
+  rightEye.position.x = 0.15
+  group.add(rightEye)
 
   const tail = new THREE.Mesh(
     new THREE.BoxGeometry(0.15, 0.15, 0.6),
@@ -507,7 +518,7 @@ function updateFps(now) {
 
 function update(dt) {
   const keyboardX = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0)
-  const keyboardZ = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0)
+  const keyboardZ = (keys.KeyS || keys.ArrowDown ? 1 : 0) - (keys.KeyW || keys.ArrowUp ? 1 : 0)
   const drag = getDragMoveVector()
 
   let moveX = keyboardX
@@ -515,7 +526,7 @@ function update(dt) {
 
   if (drag) {
     moveX = drag.x
-    moveZ = drag.z
+    moveZ = -drag.z
   }
 
   if (moveX !== 0 || moveZ !== 0) {
