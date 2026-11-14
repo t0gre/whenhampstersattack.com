@@ -120,8 +120,10 @@ scene.add(fill)
 const world = new THREE.Group()
 scene.add(world)
 
+// World axes: x = left/right, y = up/down, z = depth along the road.
+// In this scene, negative z is forward/down the street and positive z is back/up the street.
 const ground = new THREE.Mesh(
-  new THREE.BoxGeometry(90, 1, 120),
+  new THREE.BoxGeometry(180, 1, 120),
   new THREE.MeshPhongMaterial({ color: '#7ea663', shininess: 10 })
 )
 ground.position.y = -0.6
@@ -129,7 +131,7 @@ ground.receiveShadow = true
 world.add(ground)
 
 const street = new THREE.Mesh(
-  new THREE.BoxGeometry(72, 0.18, 100),
+  new THREE.BoxGeometry(180, 0.18, 100),
   new THREE.MeshPhongMaterial({ color: '#2a2d31', shininess: 12 })
 )
 street.position.y = 0.1
@@ -137,15 +139,15 @@ street.receiveShadow = true
 world.add(street)
 
 const sidewalkLeft = new THREE.Mesh(
-  new THREE.BoxGeometry(16, 0.12, 105),
+  new THREE.BoxGeometry(18, 0.12, 105),
   new THREE.MeshPhongMaterial({ color: '#b5bcc7', shininess: 8 })
 )
-sidewalkLeft.position.set(-44, 0.07, 0)
+sidewalkLeft.position.set(-106, 0.07, 0)
 sidewalkLeft.receiveShadow = true
 world.add(sidewalkLeft)
 
 const sidewalkRight = sidewalkLeft.clone()
-sidewalkRight.position.x = 44
+sidewalkRight.position.x = 106
 world.add(sidewalkRight)
 
 for (let z = -42; z <= 42; z += 12) {
@@ -163,7 +165,7 @@ const windowMaterial = new THREE.MeshPhongMaterial({ color: '#f2d17d', emissive:
 const obstacleRects = []
 
 for (let bx = -2; bx <= 2; bx += 1) {
-  const baseX = bx * 18 + (bx >= 0 ? 4 : -4)
+  const baseX = bx * 24 + (bx >= 0 ? 44 : -44)
   for (let bz = -42; bz <= 42; bz += 10) {
     const width = 9 + Math.random() * 4
     const depth = 7 + Math.random() * 2.5
@@ -184,7 +186,7 @@ for (let bx = -2; bx <= 2; bx += 1) {
       }
     }
 
-    const x = baseX + (Math.random() > 0.5 ? 7.5 : -7.5)
+    const x = baseX + (Math.random() > 0.5 ? 12 : -12)
     building.position.set(x, 0, bz)
     world.add(building)
     obstacleRects.push({ x, z: bz, w: width + 2, d: depth + 2 })
@@ -241,7 +243,7 @@ function clamp(value, min, max) {
 }
 
 function moveWithCollisions(nextPos, radius) {
-  nextPos.x = clamp(nextPos.x, -38 + radius, 38 - radius)
+  nextPos.x = clamp(nextPos.x, -100 + radius, 100 - radius)
   nextPos.z = clamp(nextPos.z, -46 + radius, 46 - radius)
 
   for (const rect of obstacleRects) {
