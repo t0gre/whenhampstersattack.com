@@ -11,7 +11,7 @@ app.innerHTML = `
       <div><span>Wave</span><strong id="wave">1</strong></div>
     </div>
     <div id="fps" class="fps">60 FPS</div>
-    <div class="tips">WASD move • Shift sprint • Space jump • F slash</div>
+    <div class="tips">WASD move • Shift sprint • Space jump • F slash • Drag to move</div>
   </div>
 `
 
@@ -21,6 +21,67 @@ const hud = {
   wave: document.querySelector('#wave'),
   fps: document.querySelector('#fps'),
 }
+
+const pointerDrag = {
+  active: false,
+  dragging: false,
+  moveX: 0,
+  moveY: 0,
+}
+
+function getDragMoveVector() {
+  if (!pointerDrag.active || !pointerDrag.dragging) return null
+
+  const dragLen = Math.hypot(pointerDrag.moveX, pointerDrag.moveY)
+  if (dragLen < 8) return null
+
+  return {
+    x: clamp(pointerDrag.moveX / 140, -1, 1),
+    z: clamp(-pointerDrag.moveY / 140, -1, 1),
+  }
+}
+
+window.addEventListener('pointerdown', (event) => {
+  pointerDrag.active = true
+  pointerDrag.dragging = false
+  pointerDrag.moveX = 0
+  pointerDrag.moveY = 0
+  pointerDrag.lastX = event.clientX
+  pointerDrag.lastY = event.clientY
+})
+
+window.addEventListener('pointermove', (event) => {
+  if (!pointerDrag.active) return
+
+  const dx = event.clientX - pointerDrag.lastX
+  const dy = event.clientY - pointerDrag.lastY
+  pointerDrag.lastX = event.clientX
+  pointerDrag.lastY = event.clientY
+  pointerDrag.moveX += dx
+  pointerDrag.moveY += dy
+
+  if (Math.hypot(pointerDrag.moveX, pointerDrag.moveY) > 12) {
+    pointerDrag.dragging = true
+  }
+})
+
+window.addEventListener('pointerup', () => {
+  if (!pointerDrag.dragging) {
+    triggerAttack()
+  }
+
+  pointerDrag.active = false
+  pointerDrag.dragging = false
+  pointerDrag.moveX = 0
+  pointerDrag.moveY = 0
+})
+
+window.addEventListener('pointercancel', () => {
+  pointerDrag.active = false
+  pointerDrag.dragging = false
+  pointerDrag.moveX = 0
+  pointerDrag.moveY = 0
+})
 
 const scene = new THREE.Scene()
 scene.background = new THREE.Color('#a3c0d8')
@@ -445,8 +506,17 @@ function updateFps(now) {
 }
 
 function update(dt) {
-  const moveX = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0)
-  const moveZ = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0)
+  const keyboardX = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0)
+  const keyboardZ = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0)
+  const drag = getDragMoveVector()
+
+  let moveX = keyboardX
+  let moveZ = keyboardZ
+
+  if (drag) {
+    moveX = drag.x
+    moveZ = drag.z
+  }
 
   if (moveX !== 0 || moveZ !== 0) {
     const len = Math.hypot(moveX, moveZ) || 1
